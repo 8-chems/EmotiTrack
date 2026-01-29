@@ -1,0 +1,4 @@
+deployment:
+  platform: "Heroku"
+  app_name: "sentiment-analysis-api"
+  region: "us"

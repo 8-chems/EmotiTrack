@@ -1,0 +1,35 @@
+stages:
+  ingest:
+    cmd: python src/data/ingestion.py
+    deps:
+      - src/data/ingestion.py
+    outs:
+      - data/raw/data.csv
+
+  clean:
+    cmd: python src/data/cleaning.py
+    deps:
+      - data/raw/data.csv
+      - src/data/cleaning.py
+    outs:
+      - data/processed/cleaned_data.csv
+
+  validate:
+    cmd: python src/data/validation.py
+    deps:
+      - data/processed/cleaned_data.csv
+      - src/data/validation.py
+
+  features:
+    cmd: python src/data/build_features.py
+    deps:
+      - data/processed/cleaned_data.csv
+      - src/data/build_features.py
+    outs:
+      - data/processed/feature_data.csv
+
+  train:
+    cmd: python src/models/train.py
+    deps:
+      - data/processed/feature_data.csv
+      - src/models/train.py
