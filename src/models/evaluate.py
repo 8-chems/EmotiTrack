@@ -1,14 +1,27 @@
-import pandas as pd
-from sklearn.metrics import classification_report
+import json
+from pathlib import Path
 
-def evaluate_model(y_true: list, y_pred: list):
-    report = classification_report(y_true, y_pred)
-    print(report)
+import joblib
+import pandas as pd
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+
+def evaluate(model_path: str, data_path: str):
+    model = joblib.load(Path(model_path))
+    df = pd.read_csv(data_path)
+    y_true = df["label"]
+    y_pred = model.predict(df["text"])
+
+    acc = accuracy_score(y_true, y_pred)
+    report = classification_report(y_true, y_pred, output_dict=True)
+    cm = confusion_matrix(y_true, y_pred).tolist()
+
+    metrics = {"accuracy": float(acc), "confusion_matrix": cm, "report": report}
+    Path("metrics").mkdir(exist_ok=True)
+    with open("metrics/eval_metrics.json", "w") as f:
+        json.dump(metrics, f, indent=2)
+    return metrics
+
 
 if __name__ == "__main__":
-    # Load your validation data and predictions
-    validation_data = pd.read_csv("data/validation_data.csv")  # Replace with actual validation data path
-    y_true = validation_data['label'].tolist()  # Actual labels
-    y_pred = []  # Replace with actual predictions
-
-    evaluate_model(y_true, y_pred)
+    evaluate("models/sentiment_classifier.joblib", "data/processed/feature_data.csv")

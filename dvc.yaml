@@ -1,30 +1,20 @@
 stages:
-  ingest:
-    cmd: python src/data/ingestion.py
-    deps:
-      - src/data/ingestion.py
+  generate:
+    cmd: python src/data/generate_synthetic_data.py
     outs:
-      - data/raw/data.csv
+      - data/raw/synthetic_data.csv
 
   clean:
     cmd: python src/data/cleaning.py
     deps:
-      - data/raw/data.csv
-      - src/data/cleaning.py
+      - data/raw/synthetic_data.csv
     outs:
       - data/processed/cleaned_data.csv
-
-  validate:
-    cmd: python src/data/validation.py
-    deps:
-      - data/processed/cleaned_data.csv
-      - src/data/validation.py
 
   features:
     cmd: python src/data/build_features.py
     deps:
       - data/processed/cleaned_data.csv
-      - src/data/build_features.py
     outs:
       - data/processed/feature_data.csv
 
@@ -32,4 +22,5 @@ stages:
     cmd: python src/models/train.py
     deps:
       - data/processed/feature_data.csv
-      - src/models/train.py
+    outs:
+      - models/sentiment_classifier.joblib

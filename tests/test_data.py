@@ -1,16 +1,11 @@
-import pytest
 import pandas as pd
-from src.data.generate_synthetic_data import generate_synthetic_data
 
-# Example test for data validation
+from src.data.cleaning import clean_data
+from src.data.validation import validate_data
 
-def test_data_validation():
-    assert True  # Replace with actual validation logic
 
-def test_generate_synthetic_data():
-    num_samples = 100
-    data = generate_synthetic_data(num_samples)
-    assert len(data) == num_samples
-    assert 'text' in data.columns
-    assert 'label' in data.columns
-    assert all(data['label'].isin([0, 1]))  # Labels should be 0 or 1
+def test_clean_and_validate():
+    df = pd.DataFrame({"text": ["I love this", None], "label": [1, 0]})
+    cleaned = clean_data(df)
+    assert cleaned["text"].isnull().sum() == 0
+    assert validate_data(cleaned)

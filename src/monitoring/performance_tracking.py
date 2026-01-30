@@ -1,22 +1,17 @@
+import logging
+from pathlib import Path
+
 import pandas as pd
-from evidently import ColumnMapping
-from evidently.report import Report
-from evidently.metric import RegressionPerformanceMetric
 
-def log_performance(current_data: pd.DataFrame, baseline_data: pd.DataFrame):
-    column_mapping = ColumnMapping(
-        target="label",  # The target column for your model
-        features=["text"]  # The feature column(s)
-    )
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("emotitrack.performance")
 
-    # Create a report
-    report = Report(metrics=[RegressionPerformanceMetric()])
-    report.run(current_data=current_data, reference_data=baseline_data, column_mapping=column_mapping)
 
-    # Save the report to a file (optional)
-    report.save("performance_report.html")
-
-if __name__ == "__main__":
-    current_data = pd.read_csv("data/processed/feature_data.csv")  # Current data
-    baseline_data = pd.read_csv("data/baseline_data.csv")  # Baseline data for comparison
-    log_performance(current_data, baseline_data)
+def log_performance(metrics: dict, path: str = "metrics/performance.log.csv"):
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    df = pd.DataFrame([metrics])
+    if Path(path).exists():
+        df.to_csv(path, mode="a", header=False, index=False)
+    else:
+        df.to_csv(path, index=False)
+    logger.info("Logged performance metrics: %s", metrics)

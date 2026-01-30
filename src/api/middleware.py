@@ -1,9 +1,20 @@
-from fastapi import FastAPI, Request
 import logging
+import time
 
-logging.basicConfig(level=logging.INFO)
+from fastapi import Request
 
-async def log_request(request: Request):
-    logging.info(f"Request: {request.method} {request.url}")
+logger = logging.getLogger("emotitrack.middleware")
 
-app.middleware("http")(log_request)
+
+async def log_requests_middleware(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = time.time() - start
+    logger.info(
+        "%s %s completed in %.3fs status=%s",
+        request.method,
+        request.url.path,
+        duration,
+        response.status_code,
+    )
+    return response

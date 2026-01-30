@@ -1,27 +1,59 @@
-import pandas as pd
 import random
+from pathlib import Path
 
-def generate_synthetic_data(num_samples: int) -> pd.DataFrame:
-    texts = [
-        "I love this product!",
-        "This is the worst experience I've ever had.",
-        "Absolutely fantastic!",
-        "I'm not happy with the service.",
-        "This is okay, not great.",
-        "I would definitely recommend this.",
-        "Terrible, would not buy again.",
-        "Very satisfied with my purchase.",
-        "It's just average.",
-        "I hate it."
+import pandas as pd
+
+
+def generate_synthetic_data(num_samples: int = 1000) -> pd.DataFrame:
+    positive_texts = [
+        "I absolutely love this!",
+        "This is fantastic.",
+        "Great experience overall.",
+        "Highly recommended.",
+        "Amazing product!",
     ]
-    labels = [1, 0, 1, 0, 0, 1, 0, 1, 0, 0]  # 1 for positive, 0 for negative
+    negative_texts = [
+        "I hate this.",
+        "This is terrible.",
+        "Very bad experience.",
+        "Would not recommend.",
+        "Awful product.",
+    ]
+    neutral_texts = [
+        "It's okay.",
+        "Average experience.",
+        "Nothing special.",
+        "It's fine.",
+        "Not good, not bad.",
+    ]
 
-    data = {
-        "text": [random.choice(texts) for _ in range(num_samples)],
-        "label": [random.choice(labels) for _ in range(num_samples)]
-    }
-    return pd.DataFrame(data)
+    data = {"text": [], "label": []}
+
+    pos_n = num_samples // 3
+    neg_n = num_samples // 3
+    neu_n = num_samples - pos_n - neg_n
+
+    for _ in range(pos_n):
+        data["text"].append(random.choice(positive_texts))
+        data["label"].append(1)
+
+    for _ in range(neg_n):
+        data["text"].append(random.choice(negative_texts))
+        data["label"].append(0)
+
+    for _ in range(neu_n):
+        t = random.choice(neutral_texts)
+        # neutral randomly assigned
+        data["text"].append(t)
+        data["label"].append(random.choice([0, 1]))
+
+    df = pd.DataFrame(data).sample(frac=1, random_state=42).reset_index(drop=True)
+    return df
+
 
 if __name__ == "__main__":
-    synthetic_data = generate_synthetic_data(100)  # Generate 100 samples
-    synthetic_data.to_csv("data/raw/synthetic_data.csv", index=False)
+    out_dir = Path("data/raw")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    df = generate_synthetic_data(1000)
+    df.to_csv(out_dir / "synthetic_data.csv", index=False)
+    print("Synthetic data saved to data/raw/synthetic_data.csv")
